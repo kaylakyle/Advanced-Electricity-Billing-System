@@ -1,0 +1,47 @@
+* { margin:0; padding:0; box-sizing:border-box; font-family: 'Segoe UI', sans-serif; }
+    body { display:flex; background:#f9fafc; color:#333; }
+
+    /* Sidebar */
+    .sidebar { width:240px; background:#fff; height:100vh; padding:20px; border-right:1px solid #eee; position:fixed; }
+    .sidebar .logo { margin-bottom:40px; }
+    .sidebar .logo h2 { color:#007bff; font-size:20px; }
+    .sidebar .logo p { font-size:12px; color:#777; }
+    .sidebar nav a { display:block; padding:12px 15px; color:#444; border-radius:8px; margin-bottom:8px; text-decoration:none; }
+    .sidebar nav a:hover { background:#eef3ff;color:#1f6aff }
+    .sidebar nav a.active{ background:#1f6aff;color:#fff; }
+
+    /* Content */
+    .content { margin-left:260px; flex:1; padding:20px; }
+
+    /* Topbar */
+    .topbar { display:flex; justify-content:flex-end; align-items:center; margin-bottom:20px; }
+    .logout { border:none; background:#f0f2f5; padding:8px 15px; border-radius:6px; cursor:pointer; display:flex; align-items:center; gap:6px; }
+    .logout:hover { background:#e2e6ea; }
+
+    .divider { border:none; border-top:1px solid #e5e7eb; margin:12px 0; }
+
+    /* Billing Section */
+    .billing-system h1 { font-size:22px; margin-bottom:5px; }
+    .billing-system p { color:#666; margin-bottom:20px; }
+    .billing-grid { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+
+    /* Cards */
+    .card { background:#fff; padding:20px; border-radius:10px; box-shadow:0 2px 6px rgba(0,0,0,0.05); }
+    .card h2 { font-size:18px; margin-bottom:5px; }
+    .card p { font-size:14px; margin-bottom:15px; color:#666; }
+    .card label { display:block; font-size:14px; margin-bottom:6px; color:#444; }
+    .card select, .card input { width:100%; padding:10px; border:1px solid #ddd; border-radius:6px; margin-bottom:15px; }
+    .calculate { width:100%; padding:12px; background:#007bff; border:none; color:white; border-radius:6px; font-weight:bold; cursor:pointer; }
+    .calculate:hover { background:#0056b3; }
+
+    /* Table */
+    table { width:100%; border-collapse:collapse; font-size:14px; }
+    table th, table td { padding:10px; text-align:left; border-bottom:1px solid #eee; }
+    .tag { background:#f0f2f5; padding:3px 8px; border-radius:12px; font-size:12px; }
+
+    /* Responsive */
+    @media(max-width:900px){
+      .billing-grid { grid-template-columns:1fr; }
+      .content { margin-left:0; }
+      .sidebar { position:relative; width:100%; height:auto; border:none; }
+    }

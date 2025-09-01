@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ElectroFlow Billing Dashboard</title>
+  <link rel="stylesheet" href="style.css">
+  <link href="https://cdn.jsdelivr.net/npm/remixicon/fonts/remixicon.css" rel="stylesheet">
+
+  <!-- Lucide icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+  <script>
+// Redirect to login if not logged in
+if(!localStorage.getItem("username") || !localStorage.getItem("userRole")) {
+    window.location.href = "login.html";
+}
+</script>
+
+  
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="logo">
+      <i data-lucide="bolt"></i>
+      <div>
+        <h2>ElectroFlow</h2>
+        <p>Billing Dashboard</p>
+      </div>
+    </div>
+
+
+  <ul class="menu">
+    <li class="active"><a href="index.html"><i class="ri-dashboard-line"></i> Overview</a></li>
+    <li><a href="customers.html"><i class="ri-user-3-line"></i> Customers</a></li>
+    <li><a href="billing.html"><i class="ri-bill-line"></i> Billing</a></li>
+    <li><a href="payment.html"><i class="ri-bank-card-line"></i> Payments</a></li>
+    <li><a href="report.html"><i class="ri-file-list-line"></i> Reports</a></li>
+  </ul>
+</aside>
+
+
+  </aside>
+
+  <!-- Main -->
+  <main class="main-content">
+    <!-- Topbar -->
+    <header class="topbar">
+      <div></div>
+      <div class="topbar-right">
+        <a href="#" id="logoutBtn" class="logout"><i data-lucide="log-out"></i> Logout</a>
+      </div>
+    </header>
+    <hr class="divider">
+
+    <!-- Stats -->
+    <section class="stats">
+      <div class="card" onclick="showDetails('customers')">
+        <h3>Total Customers</h3>
+        <h2 id="customers-count">0</h2>
+        <p class="blue">+0% from last month</p>
+      </div>
+      <div class="card" onclick="showDetails('revenue')">
+        <h3>Monthly Revenue</h3>
+        <h2 id="revenue">KSh 0</h2>
+        <p class="green">+0% from last month</p>
+      </div>
+      <div class="card" onclick="showDetails('bills')">
+        <h3>Pending Bills</h3>
+        <h2 id="pending">0</h2>
+        <p class="orange">0% from last month</p>
+      </div>
+      <div class="card" onclick="showDetails('units')">
+        <h3>Units Consumed</h3>
+        <h2 id="units">0</h2>
+        <p class="green">0% from last month</p>
+      </div>
+    </section>
+
+       <!-- Quick Actions -->
+    <section class="actions">
+      <h3>Quick Actions</h3>
+      <p class="sub">Frequently used operations</p>
+      <div class="action-buttons">
+        <button onclick="window.location.href='customers.html'">
+          <i data-lucide="user-plus"></i> Add Customer
+        </button>
+        <button onclick="window.location.href='billing.html'">
+          <i data-lucide="file-plus"></i> Generate Bill
+        </button>
+        <button onclick="window.location.href='payment.html'">
+          <i data-lucide="credit-card"></i> Record Payment
+        </button>
+        <button onclick="window.location.href='report.html'">
+          <i data-lucide="bar-chart"></i> View Reports
+        </button>
+        <button id="reset-system" style="background:#2563eb; color:white;">
+          <i data-lucide="trash-2"></i> Reset System
+        </button>
+      </div>
+    </section>
+
+    <!-- Activities -->
+    <section class="activities">
+      <h3>Recent Activities</h3>
+      <ul id="activity-log">
+        <li>
+          <span class="dot green"></span>
+          <span class="activity-text">System initialized</span>
+          <span class="time">just now</span>
+        </li>
+      </ul>
+    </section>
+  </main>
+<script>
+// Safe JSON parser 
+function safeParse(data) {
+  try { return JSON.parse(data) || []; } 
+  catch (e) { return []; }
+}
+
+//  Load data 
+function getCustomers() { return safeParse(localStorage.getItem("customers")); }
+function getBills() { return safeParse(localStorage.getItem("bills")); }
+function getPayments() { return safeParse(localStorage.getItem("payments")); }
+function getActivities() { return safeParse(localStorage.getItem("activities")); }
+
+// Update KPIs
+function updateKPIs() {
+  const customers = getCustomers();
+  const bills = getBills();
+  const payments = getPayments();
+
+  document.getElementById("customers-count").textContent = customers.length;
+  const totalRevenue = payments.reduce((sum, p) => sum + Number(p.paidAmt || 0), 0);
+  document.getElementById("revenue").textContent = `KSh ${totalRevenue}`;
+  const pending = bills.reduce((sum, b) => {
+    const payment = payments.find(p => p.meterNo === b.meterNo && p.month === b.month);
+    const paid = payment ? Number(payment.paidAmt || 0) : 0;
+    return sum + (Number(b.amount) - paid);
+  }, 0);
+  document.getElementById("pending").textContent = `KSh ${pending}`;
+  const totalUnits = bills.reduce((sum, b) => sum + Number(b.units || 0), 0);
+  document.getElementById("units").textContent = `${totalUnits} kWh`;
+}
+
+//  Update Activities
+function updateActivities() {
+  const activities = getActivities();
+  const activityLog = document.getElementById("activity-log");
+  activityLog.innerHTML = "";
+
+  if (!activities.length) {
+    activityLog.innerHTML = `<li>
+      <span class="dot green"></span>
+      <span class="activity-text">System initialized</span>
+      <span class="time">just now</span>
+    </li>`;
+    return;
+  }
+
+  activities.slice(-5).reverse().forEach(act => {
+    const li = document.createElement("li");
+    li.innerHTML = `
+      <span class="dot ${act.type || "green"}"></span>
+      <span class="activity-text">${act.text}</span>
+      <span class="time">${act.time}</span>
+    `;
+    activityLog.appendChild(li);
+  });
+}
+
+// Logout 
+document.getElementById("logoutBtn").addEventListener("click", (e) => {
+    e.preventDefault(); // prevent default link behavior
+    // Optional: clear session/login info if stored
+    // localStorage.removeItem("loggedInUser"); 
+    window.location.href = "login.html"; // redirect to login page
+});
+
+// Record activity 
+function logActivity(text, type = "green") {
+  const activities = getActivities();
+  const now = new Date();
+  const timeStr = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+  activities.push({ text, type, time: timeStr });
+  localStorage.setItem("activities", JSON.stringify(activities));
+}
+
+//  Manual Reset System 
+document.getElementById("reset-system").addEventListener("click", () => {
+  if (confirm("Are you sure you want to RESET the system? This will delete ALL customers, bills, payments, and activities.")) {
+    localStorage.removeItem("customers");
+    localStorage.removeItem("bills");
+    localStorage.removeItem("payments");
+    localStorage.removeItem("activities");
+    location.reload();
+  }
+});
+
+//  Auto-refresh 
+setInterval(() => {
+  updateKPIs();
+  updateActivities();
+}, 2000);
+
+//  Initialize 
+document.addEventListener("DOMContentLoaded", () => {
+  updateKPIs();
+  updateActivities();
+});
+
+const logoutBtn = document.getElementById("logoutBtn");
+if(logoutBtn){
+    logoutBtn.addEventListener("click", (e)=>{
+        e.preventDefault();
+        // Remove login info
+        localStorage.removeItem("username");
+        localStorage.removeItem("userRole");
+        // Redirect to login
+        window.location.href = "login.html";
+    });
+}
+</script>
+</body>
+</html>

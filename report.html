@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>ElectroFlow — Reports</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/remixicon/fonts/remixicon.css" rel="stylesheet">
+<link rel="stylesheet" href="report.css">
+</head>
+<body>
+
+<!-- Sidebar -->
+<aside class="sidebar">
+  <div class="brand">
+    <div>
+      <div class="brand-title">ElectroFlow</div>
+      <div class="brand-sub">Billing Dashboard</div>
+    </div>
+  </div>
+  <nav class="nav">
+    <a href="index.html" class="nav-item"><i class="ri-dashboard-line"></i><span>Overview</span></a>
+    <a href="customers.html" class="nav-item"><i class="ri-user-3-line"></i><span>Customers</span></a>
+    <a href="billing.html" class="nav-item"><i class="ri-file-list-3-line"></i><span>Billing</span></a>
+    <a href="payment.html" class="nav-item"><i class="ri-wallet-3-line"></i><span>Payments</span></a>
+    <a href="report.html" class="nav-item active"><i class="ri-bar-chart-2-line"></i><span>Reports</span></a>
+  </nav>
+</aside>
+
+<!-- Main -->
+<main class="main">
+  <header class="topbar">
+    <button class="logout"><i class="ri-logout-box-r-line"></i> Logout</button>
+  </header>
+
+  <section class="section">
+    <div class="section-head">
+      <div class="title-icon"><i class="ri-file-chart-line"></i></div>
+      <div>
+        <h1 class="h1">Reports & Analytics</h1>
+        <p class="sub">Generate comprehensive billing and usage reports</p>
+      </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="filters-row">
+      <div class="input-icon">
+        <i class="ri-stack-line"></i>
+        <select id="report-type">
+          <option selected>Monthly Report</option>
+          <option>Weekly Report</option>
+          <option>Daily Report</option>
+        </select>
+        <i class="ri-arrow-down-s-line caret"></i>
+      </div>
+      <div class="input-icon">
+        <i class="ri-calendar-line"></i>
+        <select id="report-month">
+          <option value="">All months</option>
+          <option>December 2023</option>
+          <option>January 2024</option>
+          <option>February 2024</option>
+          <option>March 2024</option>
+          <option>April 2024</option>
+        </select>
+        <i class="ri-arrow-down-s-line caret"></i>
+      </div>
+      <div class="actions">
+        <button class="btn-outline" id="export-pdf"><i class="ri-download-2-line"></i> Export PDF</button>
+        <button class="btn-outline" id="export-csv"><i class="ri-file-download-line"></i> Export CSV</button>
+      </div>
+    </div>
+
+    <!-- KPI cards -->
+    <div class="kpis">
+      <div class="kpi">
+        <div><div class="kpi-title">Total Customers</div><div class="kpi-value" id="total-customers">0</div></div>
+        <span class="kpi-icon soft-blue"><i class="ri-user-line"></i></span>
+      </div>
+      <div class="kpi">
+        <div><div class="kpi-title">Total Units</div><div class="kpi-value" id="total-units">0 kWh</div></div>
+        <span class="kpi-icon soft-yellow"><i class="ri-flashlight-line"></i></span>
+      </div>
+      <div class="kpi">
+        <div><div class="kpi-title">Total Revenue</div><div class="kpi-value" id="total-revenue">KSh 0</div></div>
+        <span class="kpi-icon soft-green"><i class="ri-money-dollar-circle-line"></i></span>
+      </div>
+      <div class="kpi">
+        <div><div class="kpi-title">Avg. Consumption</div><div class="kpi-value" id="avg-consumption">0 kWh</div></div>
+        <span class="kpi-icon soft-indigo"><i class="ri-bar-chart-box-line"></i></span>
+      </div>
+    </div>
+
+    <!-- Lower grid -->
+    <div class="lower-grid">
+      <div class="card" id="collection-card">
+        <h3 class="card-title">Collection Status</h3>
+        <div class="prog-row"><span class="prog-label">Paid Bills</span><span class="prog-count good">0/0</span></div>
+        <div class="progress"><div class="bar good" style="width:0%"></div></div>
+        <div class="prog-row"><span class="prog-label">Pending Bills</span><span class="prog-count bad">0/0</span></div>
+        <div class="progress"><div class="bar bad" style="width:0%"></div></div>
+        <div class="prog-row"><span class="prog-label">Collection Rate</span><span class="prog-count brand">0%</span></div>
+        <div class="progress"><div class="bar brand" style="width:0%"></div></div>
+      </div>
+
+      <div class="card" id="top-consumers">
+        <h3 class="card-title">Top Consumers</h3>
+        <p class="muted">Highest electricity consumption this month</p>
+      </div>
+    </div>
+
+    <!-- Customer summary -->
+    <div class="card" style="margin-top:18px;" id="customer-summary-card">
+      <h3 class="card-title">Customer Summary</h3>
+      <p class="muted">Totals grouped by customer (bills count, units, avg, amount)</p>
+      <div style="overflow-x:auto; margin-top:10px;">
+        <table style="width:100%; border-collapse: collapse; font-size:14px;">
+          <thead style="background:#f9fafb; text-align:left;">
+            <tr>
+              <th style="padding:8px; border-bottom:1px solid #e5e7eb;">Customer</th>
+              <th style="padding:8px; border-bottom:1px solid #e5e7eb;">Meter</th>
+              <th style="padding:8px; border-bottom:1px solid #e5e7eb; text-align:right">Bills</th>
+              <th style="padding:8px; border-bottom:1px solid #e5e7eb; text-align:right">Total Units</th>
+              <th style="padding:8px; border-bottom:1px solid #e5e7eb; text-align:right">Avg Units</th>
+              <th style="padding:8px; border-bottom:1px solid #e5e7eb; text-align:right">Amount</th>
+              <th style="padding:8px; border-bottom:1px solid #e5e7eb; text-align:right">Paid</th>
+              <th style="padding:8px; border-bottom:1px solid #e5e7eb; text-align:right">Pending</th>
+            </tr>
+          </thead>
+          <tbody id="customer-summary-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Detailed Monthly Report -->
+    <div class="card" style="margin-top:18px;">
+      <h3 class="card-title">Detailed Monthly Report - <span id="report-month-title">All</span></h3>
+      <p class="muted">Complete billing and consumption details</p>
+      <div style="overflow-x:auto;">
+        <table style="width:100%; border-collapse: collapse; margin-top:10px; font-size:14px;">
+          <thead style="background:#f9fafb; text-align:left;">
+            <tr>
+              <th style="padding:10px; border-bottom:1px solid #e5e7eb;">Customer</th>
+              <th style="padding:10px; border-bottom:1px solid #e5e7eb;">Meter Number</th>
+              <th style="padding:10px; border-bottom:1px solid #e5e7eb;">Previous Reading</th>
+              <th style="padding:10px; border-bottom:1px solid #e5e7eb;">Current Reading</th>
+              <th style="padding:10px; border-bottom:1px solid #e5e7eb; text-align:right">Units Consumed</th>
+              <th style="padding:10px; border-bottom:1px solid #e5e7eb; text-align:right">Bill Amount</th>
+              <th style="padding:10px; border-bottom:1px solid #e5e7eb;">Status</th>
+            </tr>
+          </thead>
+          <tbody id="detailed-report"></tbody>
+        </table>
+      </div>
+    </div>
+
+  </section>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+
+<script>
+  //  Safe JSON parser
+  function safeParse(data) {
+      try { return JSON.parse(data) || []; } 
+      catch (e) { return []; }
+  }
+
+  function getCustomers() { return safeParse(localStorage.getItem("customers")); }
+  function getBills() { return safeParse(localStorage.getItem("bills")); }
+  function getPayments() { return safeParse(localStorage.getItem("payments")); }
+
+  // ===== Filter bills/payments by month =====
+  function filterByMonth(data, month){
+      if(!month || month==="All months") return data;
+      return data.filter(d=> d.month === month);
+  }
+
+  // // ===== Calculate KPIs =====
+  // function calculateKPIs(filteredBills, filteredPayments){
+  //     const totalCustomers = getCustomers().length;
+  //     const totalUnits = filteredBills.reduce((sum,b)=>sum+Number(b.units||0),0);
+  //     const totalRevenue = filteredPayments.reduce((sum,p)=>sum+Number(p.paidAmt||0),0);
+  //     const avgConsumption = filteredBills.length ? (totalUnits/filteredBills.length).toFixed(2) : 0;
+  //     const paidBills = filteredPayments.length;
+  //     const pendingBills = filteredBills.length - paidBills;
+  //     const collectionRate = filteredBills.length ? Math.round((paidBills/filteredBills.length)*100) : 0;
+  //     return { totalCustomers, totalUnits, totalRevenue, avgConsumption, paidBills, pendingBills, collectionRate };
+  // }
+  function calculateKPIs(filteredBills, filteredPayments){
+    const totalCustomers = getCustomers().length;
+    const totalUnits = filteredBills.reduce((sum,b)=>sum+Number(b.units||0),0);
+    const totalRevenue = filteredPayments.reduce((sum,p)=>sum+Number(p.paidAmt||0),0);
+    const avgConsumption = filteredBills.length ? (totalUnits/filteredBills.length).toFixed(2) : 0;
+
+    // Paid and Pending Bills
+    let paidBills = 0;
+    filteredBills.forEach(b=>{
+        const payment = filteredPayments.find(p=>p.meterNo===b.meterNo && Number(p.paidAmt||0) >= Number(b.amount||0));
+        if(payment) paidBills++;
+    });
+    const pendingBills = filteredBills.length - paidBills;
+    const collectionRate = filteredBills.length ? Math.round((paidBills/filteredBills.length)*100) : 0;
+
+    return { totalCustomers, totalUnits, totalRevenue, avgConsumption, paidBills, pendingBills, collectionRate };
+}
+
+
+  //Get customer name safely
+  function getCustomerName(bill){
+      return bill.customer || bill.custName || bill.name || "Unknown";
+  }
+
+  //Get top consumer
+  function getTopCustomer(filteredBills){
+      if(!filteredBills.length) return "-";
+      const custMap = {};
+      filteredBills.forEach(b=>{
+          const name = getCustomerName(b);
+          if(!custMap[b.meterNo]) custMap[b.meterNo]={name:name, units:0};
+          custMap[b.meterNo].units += Number(b.units||0);
+      });
+      const top = Object.values(custMap).reduce((a,b)=> b.units>a.units?b:a, {units:0});
+      return `${top.name} (${top.units} kWh)`;
+  }
+
+  
+
+  //Update KPI display
+  function updateKPIsDisplay(kpis, filteredBills){
+      document.getElementById("total-customers").textContent = kpis.totalCustomers;
+      document.getElementById("total-units").textContent = `${kpis.totalUnits} kWh`;
+      document.getElementById("total-revenue").textContent = `KSh ${kpis.totalRevenue}`;
+      document.getElementById("avg-consumption").textContent = `${kpis.avgConsumption} kWh`;
+
+      const totalBills = kpis.paidBills + kpis.pendingBills;
+      document.querySelector("#collection-card .prog-count.good").textContent = `${kpis.paidBills}/${totalBills}`;
+      document.querySelector("#collection-card .bar.good").style.width = `${totalBills? (kpis.paidBills/totalBills*100):0}%`;
+      document.querySelector("#collection-card .prog-count.bad").textContent = `${kpis.pendingBills}/${totalBills}`;
+      document.querySelector("#collection-card .bar.bad").style.width = `${totalBills? (kpis.pendingBills/totalBills*100):0}%`;
+      document.querySelector("#collection-card .prog-count.brand").textContent = `${kpis.collectionRate}%`;
+      document.querySelector("#collection-card .bar.brand").style.width = `${kpis.collectionRate}%`;
+
+      document.getElementById("top-consumers").innerHTML = `<h3 class="card-title">Top Consumers</h3>
+      <p class="muted">Highest electricity consumption this month</p>
+      <p>${getTopCustomer(filteredBills)}</p>`;
+  }
+
+  // Customer summary
+  function renderCustomerSummary(filteredBills, filteredPayments){
+      const tbody = document.getElementById("customer-summary-body");
+      tbody.innerHTML = "";
+      const custMap = {};
+      filteredBills.forEach(b=>{
+          const name = getCustomerName(b);
+          if(!custMap[b.meterNo]) custMap[b.meterNo]={name:name, meter:b.meterNo, bills:0, units:0, amount:0, paid:0};
+          custMap[b.meterNo].bills += 1;
+          custMap[b.meterNo].units += Number(b.units||0);
+          custMap[b.meterNo].amount += Number(b.amount||0);
+      });
+      filteredPayments.forEach(p=>{
+          if(custMap[p.meterNo]) custMap[p.meterNo].paid += Number(p.paidAmt||0);
+      });
+
+      Object.values(custMap).forEach(c=>{
+          const avgUnits = (c.units/c.bills).toFixed(2);
+          const pending = c.amount - c.paid;
+          const tr = document.createElement("tr");
+          tr.innerHTML = `<td>${c.name}</td>
+                          <td>${c.meter}</td>
+                          <td style="text-align:right">${c.bills}</td>
+                          <td style="text-align:right">${c.units}</td>
+                          <td style="text-align:right">${avgUnits}</td>
+                          <td style="text-align:right">${c.amount}</td>
+                          <td style="text-align:right">${c.paid}</td>
+                          <td style="text-align:right">${pending}</td>`;
+          tbody.appendChild(tr);
+      });
+  }
+
+  // Detailed report
+  function renderDetailedReport(filteredBills){
+      const tbody = document.getElementById("detailed-report");
+      tbody.innerHTML = "";
+      const allPayments = getPayments();
+      filteredBills.forEach(b=>{
+          const payment = allPayments.find(p=>p.meterNo===b.meterNo && p.month===b.month) || {};
+          const status = (Number(payment.paidAmt||0) >= Number(b.amount||0)) ? "Paid":"Pending";
+          const tr = document.createElement("tr");
+          tr.innerHTML = `<td>${getCustomerName(b)}</td>
+                          <td>${b.meterNo}</td>
+                          <td>${b.prevReading||0}</td>
+                          <td>${b.currReading||0}</td>
+                          <td style="text-align:right">${b.units||0}</td>
+                          <td style="text-align:right">${b.amount||0}</td>
+                          <td>${status}</td>`;
+          tbody.appendChild(tr);
+      });
+      document.getElementById("report-month-title").textContent = document.getElementById("report-month").value || "All";
+  }
+
+  // Main update
+  function updateReport(){
+      const month = document.getElementById("report-month").value;
+      const allBills = getBills();
+      const allPayments = getPayments();
+      const filteredBills = filterByMonth(allBills, month);
+      const filteredPayments = filterByMonth(allPayments, month);
+      const kpis = calculateKPIs(filteredBills, filteredPayments);
+      updateKPIsDisplay(kpis, filteredBills);
+      renderCustomerSummary(filteredBills, filteredPayments);
+      renderDetailedReport(filteredBills);
+  }
+
+  // Event listeners
+  document.getElementById("report-month").addEventListener("change", updateReport);
+  document.addEventListener("DOMContentLoaded", updateReport);
+
+  
+document.addEventListener("DOMContentLoaded", () => {
+    // Login check
+    const username = localStorage.getItem("username");
+    const role = localStorage.getItem("userRole");
+    if(!username || !role){
+        window.location.href = "login.html";
+        return;
+    }
+
+    // Display username
+    const userDisplay = document.getElementById("userDisplay");
+    if(userDisplay){
+        userDisplay.textContent = `${username} (${role})`;
+    }
+
+    
+});
+
+
+</script>
+
+
+</body>
+</html>

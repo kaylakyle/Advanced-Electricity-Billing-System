@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ElectroFlow – Payments</title>
+
+  <!-- Fonts + Icons -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+  <link rel="stylesheet" href="payment.css">
+  <style>
+    /* Basic modal styling */
+    .modal { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.5); justify-content:center; align-items:center; z-index:100; }
+    .modal-content { background:#fff; padding:20px; border-radius:10px; width:400px; }
+    .modal-actions { margin-top:15px; display:flex; justify-content:flex-end; gap:10px; }
+  </style>
+</head>
+<body>
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="logo"><h2>ElectroFlow</h2><p>Billing Dashboard</p></div>
+    <nav class="nav">
+      <a href="index.html" class="nav-item"><i class="ri-layout-3-line"></i>Overview</a>
+      <a href="customers.html" class="nav-item"><i class="ri-team-line"></i>Customers</a>
+      <a href="billing.html" class="nav-item"><i class="ri-file-list-3-line"></i>Billing</a>
+      <a href="payment.html" class="nav-item active"><i class="ri-bank-card-line"></i>Payments</a>
+      <a href="report.html" class="nav-item"><i class="ri-bar-chart-2-line"></i>Reports</a>
+    </nav>
+  </aside>
+
+  <!-- Main -->
+  <main class="main">
+    <!-- Topbar -->
+    <header class="topbar">
+      <button class="btn-ghost" id="logout"><i class="ri-logout-box-r-line"></i> Logout</button>
+    </header>
+
+    <!-- KPIs -->
+    <section class="kpis">
+      <div class="kpi"><div><div class="kpi-title">Total Collected</div><div class="kpi-value" id="kpi-collected">KSh 0</div></div><div class="kpi-icon kpi-green"><i class="ri-wallet-3-line"></i></div></div>
+      <div class="kpi"><div><div class="kpi-title">Pending Amount</div><div class="kpi-value danger" id="kpi-pending">KSh 0</div></div><div class="kpi-icon kpi-red"><i class="ri-time-line"></i></div></div>
+      <div class="kpi"><div><div class="kpi-title">Collection Rate</div><div class="kpi-value" id="kpi-rate">0%</div></div><div class="kpi-icon kpi-blue"><i class="ri-pie-chart-2-line"></i></div></div>
+    </section>
+
+    <!-- Payment Management -->
+    <section class="panel">
+      <div class="panel-head">
+        <div class="panel-title"><i class="ri-layout-grid-line"></i><h2>Payment Management</h2></div>
+        <div class="panel-actions">
+          <div class="search-wrap"><i class="ri-search-line"></i><input type="text" id="search" placeholder="Search..."></div>
+          <button class="btn-primary" id="open-modal"><i class="ri-add-circle-line"></i> Record Payment</button>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table class="table">
+          <thead>
+            <tr><th>Customer</th><th>Meter</th><th>Month</th><th>Amount</th><th>Paid</th><th>Balance</th><th>Date</th><th>Method</th><th>Status</th><th class="txt-right">Actions</th></tr>
+          </thead>
+          <tbody id="payment-body"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <!-- Modal -->
+  <div class="modal" id="payment-modal">
+    <div class="modal-content">
+      <h3>Record Payment</h3>
+      <label>Customer</label>
+      <select id="custSelect">
+        <option value="">Select Customer</option>
+      </select>
+      <label>Bill Amount (KSh)</label>
+      <input type="number" id="billAmt">
+      <label>Paid Amount (KSh)</label>
+      <input type="number" id="paidAmt">
+      <label>Payment Method</label>
+      <select id="payMethod"><option>M-Pesa</option><option>Cash</option><option>Bank Transfer</option></select>
+      <div class="modal-actions">
+        <button class="btn-light" id="cancel-modal">Cancel</button>
+        <button class="btn-primary" id="save-payment">Save</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+  // Safe JSON parser
+  function safeParse(data) {
+      try { return JSON.parse(data) || []; } 
+      catch (e) { return []; }
+  }
+
+  //  LocalStorage helpers 
+  function getCustomers() { return safeParse(localStorage.getItem("customers")); }
+  function getBills() { return safeParse(localStorage.getItem("bills")); }
+  
+  // Get payments AND clean invalid ones permanently
+  function getPayments() {
+      let payments = safeParse(localStorage.getItem("payments"));
+      payments = payments.filter(p => p && p.custName && p.meterNo);
+      localStorage.setItem("payments", JSON.stringify(payments)); 
+      return payments;
+  }
+
+  function savePayments(payments) { 
+      payments = payments.filter(p => p && p.custName && p.meterNo); 
+      localStorage.setItem("payments", JSON.stringify(payments)); 
+  }
+
+  //Populate customer dropdown
+  function populateCustomerDropdown() {
+      const select = document.getElementById("custSelect");
+      select.innerHTML = `<option value="">Select Customer</option>`;
+      getCustomers().forEach(c => {
+          if(c && c.name && c.meter){
+              const option = document.createElement("option");
+              option.value = c.meter;
+              option.textContent = `${c.name} (${c.meter})`;
+              select.appendChild(option);
+          }
+      });
+  }
+
+  //  Auto-fill bill amount when customer changes
+  document.getElementById("custSelect").addEventListener("change", () => {
+      const meterNo = document.getElementById("custSelect").value;
+      const bills = getBills();
+      if(!meterNo) { document.getElementById("billAmt").value = ""; return; }
+      
+      const customerBills = bills.filter(b => b.meterNo === meterNo);
+      const latestBill = customerBills.length ? customerBills[customerBills.length-1] : null;
+      document.getElementById("billAmt").value = latestBill ? latestBill.amount : 0;
+  });
+
+  // Render payments table
+  function renderPayments(payments, originalPayments = null) {
+      const tbody = document.getElementById("payment-body");
+      tbody.innerHTML = "";
+      const bills = getBills();
+      const allPayments = originalPayments || getPayments();
+
+      payments.forEach((p) => {
+          if(!p || !p.custName || !p.meterNo) return;
+
+          const i = allPayments.findIndex(pay => 
+              pay.custName === p.custName &&
+              pay.meterNo === p.meterNo &&
+              pay.date === p.date &&
+              pay.paidAmt === p.paidAmt &&
+              pay.billAmt === p.billAmt
+          );
+
+          const bill = bills.find(b => b.meterNo===p.meterNo && b.month===p.month) || {};
+          const balance = (bill.amount || p.billAmt || 0) - (p.paidAmt || 0);
+
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+            <td>${p.custName}</td>
+            <td>${p.meterNo}</td>
+            <td>${p.month || "-"}</td>
+            <td>${bill.amount || p.billAmt || 0}</td>
+            <td>${p.paidAmt}</td>
+            <td>${balance}</td>
+            <td>${p.date}</td>
+            <td>${p.method}</td>
+            <td>${balance === 0 ? "Paid" : "Pending"}</td>
+            <td>
+              <button class="edit-btn" data-index="${i}">Edit</button>
+              <button class="delete-btn" data-index="${i}">Delete</button>
+            </td>`;
+          tbody.appendChild(tr);
+      });
+  }
+
+  // Update KPIs 
+  function updateKPIs() {
+      const payments = getPayments();
+      const bills = getBills();
+      const totalCollected = payments.reduce((sum, p) => sum + Number(p.paidAmt || 0), 0);
+      const pending = bills.reduce((sum, b) => {
+          const pay = payments.find(p => p.meterNo===b.meterNo && p.month===b.month);
+          const paid = pay ? Number(pay.paidAmt || 0) : 0;
+          return sum + ((Number(b.amount)||0) - paid);
+      }, 0);
+      const totalBills = bills.reduce((sum,b)=> sum + (Number(b.amount)||0), 0);
+      const collectionRate = totalBills>0 ? Math.round((totalCollected/totalBills)*100) : 0;
+
+      document.getElementById("kpi-collected").textContent = `KSh ${totalCollected}`;
+      document.getElementById("kpi-pending").textContent = `KSh ${pending}`;
+      document.getElementById("kpi-rate").textContent = `${collectionRate}%`;
+  }
+
+  //Modal Controls
+  let editingIndex = null;
+  function openPaymentModal(editIndex=null){
+      editingIndex = editIndex;
+      populateCustomerDropdown();
+      document.getElementById("payment-modal").style.display="flex";
+
+      if(editingIndex!==null){
+          const p = getPayments()[editingIndex];
+          document.getElementById("custSelect").value = p.meterNo;
+          document.getElementById("billAmt").value = p.billAmt;
+          document.getElementById("paidAmt").value = p.paidAmt;
+          document.getElementById("payMethod").value = p.method;
+      } else {
+          document.getElementById("custSelect").value="";
+          document.getElementById("billAmt").value="";
+          document.getElementById("paidAmt").value="";
+          document.getElementById("payMethod").value="M-Pesa";
+      }
+  }
+
+  document.getElementById("open-modal").addEventListener("click", ()=>openPaymentModal());
+  document.getElementById("cancel-modal").addEventListener("click", ()=>document.getElementById("payment-modal").style.display="none");
+
+  //Save Payment
+  document.getElementById("save-payment").addEventListener("click", ()=>{
+      const custSelect = document.getElementById("custSelect");
+      const meterNo = custSelect.value;
+      const custName = custSelect.selectedOptions[0]?.text.split(" (")[0] || "";
+      const billAmt = Number(document.getElementById("billAmt").value);
+      const paidAmt = Number(document.getElementById("paidAmt").value);
+      const method = document.getElementById("payMethod").value;
+      const date = new Date().toLocaleDateString();
+      const month = new Date().toLocaleString("default",{month:"long",year:"numeric"});
+
+      if(!meterNo || !paidAmt){ alert("Select customer & enter paid amount"); return; }
+
+      const payments = getPayments();
+      const paymentObj = {custName,meterNo,billAmt,paidAmt,method,date,month};
+
+      if(editingIndex!==null){ payments[editingIndex]=paymentObj; editingIndex=null; }
+      else{ payments.push(paymentObj); }
+
+      savePayments(payments);
+      renderPayments(payments);
+      updateKPIs();
+      document.getElementById("payment-modal").style.display="none";
+  });
+
+  //  Edit/Delete
+  document.getElementById("payment-body").addEventListener("click",(e)=>{
+      if(e.target.classList.contains("edit-btn")) openPaymentModal(Number(e.target.dataset.index));
+      if(e.target.classList.contains("delete-btn")){
+          const idx=Number(e.target.dataset.index);
+          const payments=getPayments();
+          if(confirm("Delete this payment?")){
+              payments.splice(idx,1);
+              savePayments(payments);
+              renderPayments(payments);
+              updateKPIs();
+          }
+      }
+  });
+
+  
+
+  // Search
+  document.getElementById("search").addEventListener("input",(e)=>{
+      const query = e.target.value.toLowerCase();
+      const allPayments = getPayments();
+      const filtered = allPayments.filter(p => 
+          (p.custName && p.custName.toLowerCase().includes(query)) ||
+          (p.meterNo && p.meterNo.toString().toLowerCase().includes(query))
+      );
+      renderPayments(filtered, allPayments);
+  });
+
+  //Initialize
+  document.addEventListener("DOMContentLoaded", ()=>{
+      populateCustomerDropdown();
+      renderPayments(getPayments());
+      updateKPIs();
+
+      
+document.addEventListener("DOMContentLoaded", () => {
+    //  Login check
+    const username = localStorage.getItem("username");
+    const role = localStorage.getItem("userRole");
+    if(!username || !role){
+        window.location.href = "login.html";
+        return;
+    }
+
+    //  Display username
+    const userDisplay = document.getElementById("userDisplay");
+    if(userDisplay){
+        userDisplay.textContent = `${username} (${role})`;
+    }
+
+});
+
+
+  });
+</script>
+</body>
+</html>

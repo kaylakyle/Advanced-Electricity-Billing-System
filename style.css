@@ -1,0 +1,258 @@
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; font-family: "Segoe UI", Arial, sans-serif; color: #0f172a; }
+body { display: flex; background: #f8f9fc; }
+
+/*  Sidebar */
+.sidebar {
+  width: 240px;
+  background: #ffffff;
+  border-right: 1px solid #eaeaea;
+  padding: 20px;
+  height: 100vh;
+  position: sticky;
+  top: 0;
+}
+.logo { display: flex; align-items: center; gap: 10px; margin-bottom: 28px; }
+.logo i { color: #2563eb; }
+.logo h2 { font-size: 18px; margin: 0; }
+.logo p { font-size: 12px; color: #64748b; margin: 0; }
+
+.menu { list-style: none; padding: 0; margin: 0; }
+.menu li { margin: 6px 0; }
+.menu li a {
+  display: flex; align-items: center; gap: 10px;
+  text-decoration: none; color: #0f172a; font-size: 14px;
+  padding: 10px 12px; border-radius: 8px; transition: background 0.2s, color 0.2s;
+}
+.menu li a:hover { background: #eef2ff; color: #2563eb; }
+.menu li.active > a { background: #2563eb; color: #fff; }
+.menu li.active > a i { color: #fff; }
+
+/*Main */
+.main-content { flex: 1; display: flex; flex-direction: column; }
+
+/* Topbar */
+.topbar {
+  display: flex; justify-content: space-between; align-items: center;
+  background: #fff; padding: 14px 20px;
+}
+.topbar-right { display: flex; align-items: center; gap: 12px; }
+.role {
+  background: #e0f2fe; color: #0369a1;
+  padding: 4px 10px; border-radius: 8px; font-size: 13px;
+}
+.logout {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: #f1f5f9; color: #0f172a; text-decoration: none;
+  padding: 8px 12px; border-radius: 8px;
+}
+.logout:hover { background: #e2e8f0; }
+
+.divider { border: none; border-top: 1px solid #e5e7eb; margin: 0 0 10px; }
+
+/* Stats */
+.stats {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  gap: 20px; padding: 20px;
+}
+.card {
+  background: #fff; padding: 18px; border-radius: 12px;
+  box-shadow: 0 2px 5px rgba(0,0,0,.05);
+  cursor: pointer; transition: transform .15s ease;
+}
+.blue{
+  color: #2563eb;
+}
+.green{
+  color: #16a34a;
+}
+.orange{
+  color: #ca8a04;
+}
+.card:hover { transform: translateY(-4px); }
+.card h3 { font-size: 14px; color: #475569; margin: 0 0 8px; }
+.card h2 { font-size: 22px; margin: 0 0 6px; }
+.trend.up { color: #16a34a; }
+.trend.down { color: #f97316; }
+
+/* Activities + Actions */
+.grid {
+  display: grid; grid-template-columns: 2fr 1fr; gap: 20px; padding: 0 20px 20px;
+}
+.activities, .actions {
+  background: #fff; padding: 18px; border-radius: 12px;
+  box-shadow: 0 2px 5px rgba(0,0,0,.05);
+}
+.sub { font-size: 12px; color: #64748b; margin: 6px 0 14px; }
+
+/* Recent Activities */
+.activities ul { list-style: none; margin: 0; padding: 0; }
+.activities li {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 0; border-bottom: 1px solid #f0f0f0; font-size: 14px;
+}
+.activities li:last-child { border-bottom: none; }
+.activity-text { flex: 1; margin-left: 8px; color: #334155; }
+.time { font-size: 12px; color: #64748b; }
+
+/* Status Dots */
+.dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+.dot.green { background: #16a34a; }
+.dot.blue  { background: #2563eb; }
+.dot.yellow{ background: #ca8a04; }
+
+/* Quick Actions */
+.action-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.action-buttons button {
+  background: #f1f5f9; border: none; padding: 12px 14px; border-radius: 10px;
+  cursor: pointer; font-size: 14px; display: flex; align-items: center; justify-content: center; gap: 8px;
+}
+.action-buttons button:hover { background: #2563eb; color: #fff; }
+
+/* Toast */
+.toast {
+  position: fixed; bottom: 20px; right: 20px; background: #1e293b; color: #fff;
+  padding: 12px 16px; border-radius: 10px; box-shadow: 0 6px 20px rgba(0,0,0,.15);
+  border-left: 4px solid #2563eb; opacity: 0; pointer-events: none; transition: opacity .35s ease;
+}
+.toast.show { opacity: 1; pointer-events: auto; }
+.toast strong { display: block; margin-bottom: 4px; }
+
+
+/* Customers Page */
+.actions {
+  margin: 15px;
+}
+.add-btn {
+  background: #0d6efd;
+  color: white;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-left: 1100px;
+  
+}
+.add-btn:hover {
+  background: #0056b3;
+}
+.CustomerMgmt{
+  margin-bottom: 1px;
+}
+/* Table */
+.customers-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+.customers-table th, .customers-table td {
+  border: 1px solid #ddd;
+  padding: 10px;
+  text-align: left;
+}
+.customers-table th {
+  background: #f1f1f1;
+}
+.customers-table tr:hover {
+  background: #f9f9f9;
+}
+.section{
+  margin: 15px;
+}
+/* Status labels */
+.status {
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+}
+.status.active {
+  background: #d4edda;
+  color: #155724;
+}
+.status.inactive {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+/* Buttons */
+.edit-btn {
+  background: #ffc107;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 4px;
+  margin-right: 4px;
+  cursor: pointer;
+}
+.edit-btn:hover { background: #e0a800; }
+
+.delete-btn {
+  background: #dc3545;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  color: white;
+}
+.delete-btn:hover { background: #c82333; }
+
+.auth-body {
+    display: flex;
+    justify-content: center;  
+    align-items: center;      
+    height: 100vh;           
+    margin: 0;
+    background-color: lightcyan;  
+}
+
+/* Style for the container */
+.auth-container {
+    background: white;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 400px; 
+    box-sizing: border-box;
+    text-align: center;
+}
+
+.auth-container input,
+.auth-container button {
+    width: 100%;
+    padding: 12px;
+    margin: 10px 0;
+    box-sizing: border-box;
+    border-radius: 8px;
+    
+}
+.auth-container input {
+font-family: "Segoe UI", Arial, sans-serif;
+border-radius: 8px;
+}
+
+h1{
+  color: #0d6efd;
+}
+.auth-container select{
+  width: 100%;
+  padding: 12px;
+  margin: 10px 0;
+  box-sizing: border-box;
+  font-family: "Segoe UI", Arial, sans-serif;
+  border-radius: 8px;
+}
+.auth-container label{
+  margin-right: 300px;
+  font-weight: bold;
+}
+.role {
+  font-family: "Segoe UI", Arial, sans-serif;
+  
+}
+
+.auth-container button {
+  background-color: #0d6efd;
+  color: #f1f1f1;
+  font-size: 18px;
+}

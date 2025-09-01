@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Billing System</title>
+  <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+  <link rel="stylesheet" href="billing.css">
+ 
+</head>
+<body>
+  <script>
+// Redirect to login if not logged in
+if(!localStorage.getItem("username") || !localStorage.getItem("userRole")) {
+    window.location.href = "login.html";
+}
+</script>
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="logo">
+      <h2>ElectroFlow</h2>
+      <p>Billing Dashboard</p>
+    </div>
+    <nav>
+      <a href="index.html"><i class="ri-dashboard-line"></i> Overview</a>
+      <a href="customers.html"><i class="ri-user-3-line"></i> Customers</a>
+      <a href="billing.html" class="active"><i class="ri-bill-line"></i> Billing</a>
+      <a href="payment.html"><i class="ri-bank-card-line"></i> Payments</a>
+      <a href="report.html"><i class="ri-file-list-line"></i> Reports</a>
+    </nav>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="content">
+    <!-- Topbar -->
+    <div class="topbar">
+      <button class="logout" id="logoutBtn"><i class="ri-logout-box-r-line"></i> Logout</button>
+    </div>
+    <hr class="divider">
+
+    <!-- Billing Section -->
+    <div class="billing-system">
+      <h1>Billing System</h1>
+      <p>Generate bills with slab-wise calculations</p>
+
+      <div class="billing-grid">
+        <!-- Generate Bill -->
+        <div class="card">
+          <h2><i class="ri-bill-line"></i> Generate Bill</h2>
+          <p>Enter consumption details to calculate bill amount</p>
+          
+          <label for="customer">Select Customer</label>
+          <select id="customer">
+            <option value="">Choose a customer</option>
+          </select>
+
+          <label for="units">Units Consumed (kWh)</label>
+          <input type="number" id="units" placeholder="Enter units consumed">
+
+          <button class="calculate"><i class="ri-calculator-line"></i> Calculate Bill</button>
+        </div>
+
+        <!-- Current Rate Slabs -->
+        <div class="card">
+          <h2><i class="ri-flashlight-line"></i> Current Rate Slabs</h2>
+          <p>Electricity tariff structure (KSh per kWh)</p>
+          <table>
+            <thead>
+              <tr><th>Slab</th><th>Units Range</th><th>Rate</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><span class="tag">Lifeline</span></td><td>0–50</td><td>KSh 2.50</td></tr>
+              <tr><td><span class="tag">Domestic Low</span></td><td>51–100</td><td>KSh 4.00</td></tr>
+              <tr><td><span class="tag">Domestic Medium</span></td><td>101–200</td><td>KSh 6.50</td></tr>
+              <tr><td><span class="tag">Domestic High</span></td><td>201–300</td><td>KSh 9.00</td></tr>
+              <tr><td><span class="tag">Commercial</span></td><td>301+</td><td>KSh 12.00</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </main>
+<script>
+  // Safe JSON parser
+  function safeParse(data) {
+    try { return JSON.parse(data) || []; } 
+    catch (e) { return []; }
+  }
+
+  //Load customers and bills
+  function getCustomers() {
+    return safeParse(localStorage.getItem("customers"));
+  }
+
+  function getBills() {
+    return safeParse(localStorage.getItem("bills"));
+  }
+
+  function saveBills(bills) {
+    localStorage.setItem("bills", JSON.stringify(bills));
+  }
+
+  //  Populate customer dropdown
+  function populateCustomers() {
+    const customerSelect = document.getElementById("customer");
+    customerSelect.innerHTML = `<option value="">Choose a customer</option>`;
+    const customers = getCustomers();
+    customers.forEach(cust => {
+      const option = document.createElement("option");
+      option.value = cust.meter;
+      option.textContent = `${cust.name} (${cust.meter})`;
+      customerSelect.appendChild(option);
+    });
+  }
+
+  //Calculate bill based on slabs
+  function calculateBill(units) {
+    let amount = 0;
+    if (units <= 50) amount = units * 2.5;
+    else if (units <= 100) amount = 50*2.5 + (units-50)*4;
+    else if (units <= 200) amount = 50*2.5 + 50*4 + (units-100)*6.5;
+    else if (units <= 300) amount = 50*2.5 + 50*4 + 100*6.5 + (units-200)*9;
+    else amount = 50*2.5 + 50*4 + 100*6.5 + 100*9 + (units-300)*12;
+    return amount;
+  }
+
+  //Logout
+document.getElementById("logoutBtn").addEventListener("click", (e) => {
+    e.preventDefault(); // prevent default link behavior
+    // Optional: clear session/login info if stored
+    // localStorage.removeItem("loggedInUser"); 
+    window.location.href = "login.html"; // redirect to login page
+});
+
+  //  Generate Bill
+  document.querySelector(".calculate").addEventListener("click", () => {
+    const meter = document.getElementById("customer").value;
+    const units = Number(document.getElementById("units").value);
+
+    if (!meter) return alert("Please select a customer.");
+    if (!units || units <= 0) return alert("Please enter valid units.");
+
+    const amount = calculateBill(units);
+    const bills = getBills();
+
+    const today = new Date();
+    const month = `${today.getFullYear()}-${today.getMonth()+1}`;
+
+    // Get customer name
+    const customerObj = getCustomers().find(c => c.meter === meter);
+    // const customerName = customerObj ? customerObj.name : "";
+    if(!customerObj) return alert("Customer not found.");
+
+// Get last bill for this customer
+  const lastBill = bills.filter(b => b.meterNo === meter)
+                        .sort((a,b) => new Date(a.timestamp) - new Date(b.timestamp))
+                        .pop();
+
+  const prevReading = lastBill ? lastBill.currReading : 0;
+  const currReading = prevReading + units;
+    // Save bill
+    bills.push({
+      meterNo: meter,
+      customer: customerObj.name,   // store name for reports
+      units,
+      amount,
+      month,
+      prevReading,
+    currReading,
+      timestamp: today.toISOString()
+    });
+
+      localStorage.setItem("bills", JSON.stringify(bills));
+// saveBills(bills);
+ alert(`Bill generated successfully! Total: KSh ${amount.toFixed(2)}`);
+
+
+    // saveBills(bills);
+    // alert(`Bill generated successfully! Total: KSh ${amount.toFixed(2)}`);
+
+    // Clear input
+    document.getElementById("customer").value = "";
+    document.getElementById("units").value = "";
+
+    // Update dashboard KPIs if index.html is open
+    if (window.updateKPIs) window.updateKPIs();
+  });
+
+  //Initialize
+  document.addEventListener("DOMContentLoaded", () => {
+    populateCustomers();
+  });
+
+  
+const logoutBtn = document.getElementById("logoutBtn");
+if(logoutBtn){
+    logoutBtn.addEventListener("click", (e)=>{
+        e.preventDefault();
+        // Remove login info
+        localStorage.removeItem("username");
+        localStorage.removeItem("userRole");
+        // Redirect to login
+        window.location.href = "login.html";
+    });
+}
+
+
+</script>
+</body>
+</html>
