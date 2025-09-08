@@ -120,7 +120,7 @@ How to Run the System
 
 Clone the repository:
 
-git clone https://github.com/your-username/ElectroFlow.git
+git clone https://github.com/kaylakyle/ElectroFlow.git
 
 
 Open the login.html in a browser.
