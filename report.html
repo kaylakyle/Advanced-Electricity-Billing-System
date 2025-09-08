@@ -159,8 +159,11 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <script>
+
   //  Safe JSON parser
   function safeParse(data) {
       try { return JSON.parse(data) || []; } 
@@ -224,8 +227,6 @@
       const top = Object.values(custMap).reduce((a,b)=> b.units>a.units?b:a, {units:0});
       return `${top.name} (${top.units} kWh)`;
   }
-
-  
 
   //Update KPI display
   function updateKPIsDisplay(kpis, filteredBills){
@@ -332,13 +333,44 @@ document.addEventListener("DOMContentLoaded", () => {
     if(userDisplay){
         userDisplay.textContent = `${username} (${role})`;
     }
-
-    
+  // ===== Export to CSV =====
+document.getElementById("export-csv").addEventListener("click", () => {
+    const rows = [];
+    const table = document.querySelector("#detailed-report").closest("table");
+    const trs = table.querySelectorAll("tr");
+    trs.forEach(tr => {
+        const cells = tr.querySelectorAll("th,td");
+        const row = [];
+        cells.forEach(cell => row.push(cell.innerText));
+        rows.push(row.join(","));
+    });
+    const csvContent = rows.join("\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    saveAs(blob, "report.csv");
 });
 
+// ===== Export to PDF =====
+document.getElementById("export-pdf").addEventListener("click", () => {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF("l", "pt", "a4"); // landscape A4
 
+    // Capture only the Detailed Report section
+    const detailedCard = document.querySelector(".card:last-of-type");
+
+    doc.html(detailedCard, {
+        callback: function (pdf) {
+            pdf.save("report.pdf");
+        },
+        margin: [20, 20, 20, 20],
+        x: 0,
+        y: 0,
+        width: 800,
+        windowWidth: 1200
+    });
+});
+
+});
 </script>
-
 
 </body>
 </html>
