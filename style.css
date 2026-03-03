@@ -120,7 +120,7 @@ body { display: flex; background: #f8f9fc; }
 .toast strong { display: block; margin-bottom: 4px; }
 
 
-/* Customers Page */
+/* Customer Page */
 .actions {
   margin: 15px;
 }
@@ -205,7 +205,7 @@ body { display: flex; background: #f8f9fc; }
     background-color: lightcyan;  
 }
 
-/* Style for the container */
+/* Style for container */
 .auth-container {
     background: white;
     padding: 30px;

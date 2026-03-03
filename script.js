@@ -176,7 +176,7 @@ function showToast(title, message) {
   setTimeout(() => toast.classList.remove('show'), 3000);
 }
 
-// Stats / Quick Actions
+// Stats or Quick Actions
 function showDetails(kind) {
   addActivity(`Viewed ${kind} details`, 'blue');
   showToast('Details', `Opened ${kind} details`);

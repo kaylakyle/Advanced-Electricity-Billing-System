@@ -174,7 +174,7 @@
   function getBills() { return safeParse(localStorage.getItem("bills")); }
   function getPayments() { return safeParse(localStorage.getItem("payments")); }
 
-  // ===== Filter bills/payments by month =====
+  // Filter bills/payments by month
   function filterByMonth(data, month){
       if(!month || month==="All months") return data;
       return data.filter(d=> d.month === month);
