@@ -89,6 +89,7 @@ Track recent actions and logs (e.g., new bills, payments, system reset).
 
 Reset system functionality deletes all customer, bill, payment, and activity data for a fresh start.
 
+
 Technology Stack
 
 Frontend: HTML, CSS, JavaScript
@@ -98,6 +99,7 @@ Icons & Styling: Remix Icon, Google Fonts (Inter)
 Data Storage: Browser localStorage
 
 Export Reports: PDF & CSV support (via jsPDF and FileSaver.js)
+
 
 How It Works
 
