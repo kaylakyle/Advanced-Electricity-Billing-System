@@ -56,6 +56,7 @@ Calculates bill amount using units and unit price.
 Stores billing data in localStorage.
 
 4. Payments
+   
 payment.html
 
 Record payments for individual bills.
