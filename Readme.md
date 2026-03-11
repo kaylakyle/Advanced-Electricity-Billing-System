@@ -41,6 +41,7 @@ Updates KPIs in the dashboard automatically.
 Each customer has a name, meter number, and billing history.
 
 3. Billing
+   
 billing.html
 
 Generate monthly, weekly, or daily bills automatically for each customer.
