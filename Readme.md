@@ -30,6 +30,7 @@ Activities section logs system actions (new bill, payment, reset).
 Logout button clears login info and redirects to login.html.
 
 2. Customer Management
+   
 customers.html
 
 Add, view, and manage customer details.
